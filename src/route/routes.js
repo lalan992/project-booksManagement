@@ -15,7 +15,9 @@ router.post("/register", userController.createUser);
 //login
 router.post("/login", userController.userLogin);
 //Book api
-router.post("/", bookController.createBook);
-router.get("/", bookController.getBooks);
+router.post("/books", bookController.createBook);
+router.get("/books", bookController.getBooks);
+router.get("/books/:bookId", bookController.getBookById);
+router.put("/books/:bookId", bookController.updateBook);
 
 module.exports = router;
