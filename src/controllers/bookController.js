@@ -147,14 +147,14 @@ const updateBook = async function (req, res) {
     // - title  - excerpt  - release date - ISBN
 
     if (req.body.title) {
-      const validTitle = await bookModel.findOne({ title: req.body.title });
-      if (validTitle) {
-        return res.status(400).send({
-          status: false,
-          message: "Title already exists...",
-        });
-      }
       if (validator.isValid(req.body.title)) {
+        const validTitle = await bookModel.findOne({ title: req.body.title });
+        if (validTitle) {
+          return res.status(400).send({
+            status: false,
+            message: "Title already exists...",
+          });
+        }
         book.title = req.body.title.trim();
       } else {
         return res.status(400).send({
@@ -182,7 +182,7 @@ const updateBook = async function (req, res) {
             message: "ISBN already exists...",
           });
         }
-        book.category = req.body.ISBN.trim();
+        book.ISBN = req.body.ISBN.trim();
       } else {
         return res.status(400).send({
           status: false,
@@ -190,7 +190,7 @@ const updateBook = async function (req, res) {
         });
       }
     }
-    book.releasedAt = moment();
+    // book.releasedAt = moment();
     let book2 = await bookModel.findByIdAndUpdate({ _id: id }, book, {
       new: true,
     });
