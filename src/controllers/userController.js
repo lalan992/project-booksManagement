@@ -17,7 +17,7 @@ const createUser = async function (req, res) {
     if (!validator.isValidTitle(title))
       return res.status(400).send({
         status: false,
-        msg: "Title must be string and among these Mr, Mrs,Miss",
+        msg: "Title must be string and among these Mr, Mrs and Miss",
       });
     data.title = title.trim();
 
