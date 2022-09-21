@@ -37,7 +37,7 @@ const createUser = async function (req, res) {
 
     const validPhone = await userModel.findOne({ phone: data.phone });
     if (validPhone) {
-      res
+      return res
         .status(400)
         .send({ status: false, message: "Phone is already in registered.." });
     }
@@ -77,32 +77,10 @@ const createUser = async function (req, res) {
       if (!validator.isValid(pincode) || pincode.length !== 6) {
         return res
           .status(400)
-          .send({ status: false, message: "Please provide valid street" });
+          .send({ status: false, message: "Please provide valid pincode" });
       }
     }
 
-    // if (Object.keys(data).some(a => a == "address")) {
-    //     const { street, city, pincode }
-    //     // if(!typeValid(address)) return res.status(400).send({ status: false, msg: "Incorrect type of address" });
-
-    //     if (Object.keys(address).some(a => a == "street")) {
-
-    //         if (!isString(street)) return res.status(400).send({ status: false, msg: "please provide a valid street" })
-
-    //     }
-
-    //     if (Object.keys(address).some(a => a == "city")) {
-
-    //         if (!isValidName(city)) return res.status(400).send({ status: false, msg: "please provide a valid city" })
-
-    //     }
-
-    //     if (Object.keys(address).some(a => a == "pincode")) {
-
-    //         if (!(!(/^[ 0-9 ]{6,6}$/).test(pincode))) return res.status(400).send({ status: false, msg: "please provide a valid pincode" })
-
-    //     }
-    // }
     data.address.street = address["street"].trim();
     data.address.city = address["city"].trim();
     data.address.pincode = address["pincode"].toString().trim();

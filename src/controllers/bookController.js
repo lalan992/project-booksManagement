@@ -2,6 +2,7 @@ const bookModel = require("../models/bookModel");
 const userModel = require("../models/userModels");
 const reviewModel = require("../models/reviewModel");
 const validator = require("../utils/validators");
+const moment = require("moment");
 
 const createBook = async function (req, res) {
   try {
@@ -14,14 +15,22 @@ const createBook = async function (req, res) {
     }
     let decodedToken = req["x-api-key"];
     //Extract params
-    const { title, excerpt, userId, ISBN, category, subcategory, isDeleted } =
-      requestBody;
+    const {
+      title,
+      excerpt,
+      userId,
+      ISBN,
+      category,
+      subcategory,
+      releasedAt,
+      isDeleted,
+    } = requestBody;
     if (userId) {
       if (!validator.isValidObjectId(userId)) {
         return res.status(403).send({ message: " invalid userId.." });
       }
-      // if (decodedToken.userId !== userId.toString())
-      //   return res.status(403).send({ message: " Not authorised .." });
+      if (decodedToken.userId !== userId.toString())
+        return res.status(403).send({ message: " Not authorised .." });
     } else {
       return res.status(400).send({
         status: false,
@@ -36,12 +45,27 @@ const createBook = async function (req, res) {
         message: "Book Title must be string. ",
       });
     }
-    if (!validator.isValid(ISBN)) {
+    const validTitle = await bookModel.findOne({ title: req.body.title });
+    if (validTitle) {
       return res.status(400).send({
         status: false,
-        message: "Book ISBN must be string.",
+        message: "Title already exists...",
       });
     }
+    if (!validator.isValidISBN(ISBN)) {
+      return res.status(400).send({
+        status: false,
+        message: "Book ISBN must be string and 13 digits without '-'.",
+      });
+    }
+    const validISBN = await bookModel.findOne({ ISBN: req.body.ISBN });
+    if (validISBN) {
+      return res.status(400).send({
+        status: false,
+        message: "ISBN already exists...",
+      });
+    }
+
     if (!validator.isValid(excerpt)) {
       return res.status(400).send({
         status: false,
@@ -63,6 +87,14 @@ const createBook = async function (req, res) {
             "Book subcategory is an array of strings and don't provide empty string in array.",
         });
       }
+    } else {
+      return res.status(400).send({
+        status: false,
+        message: "Book subcategory is required.",
+      });
+    }
+    if (!releasedAt) {
+      requestBody.releasedAt = moment().format("YYYY-MM-DD");
     }
     //After validation Book created
     let created = await bookModel.create(requestBody);
@@ -79,29 +111,38 @@ const createBook = async function (req, res) {
 const getBooks = async function (req, res) {
   try {
     let { userId, category, subcategory } = req.query;
-    // console.log(authorId);
+    // console.log(userId);
     let query = {};
     if (userId) {
       if (!validator.isValidObjectId(userId)) {
-        return res.status(403).send({ message: " invalid userId.." });
+        return res.status(403).send({ message: "invalid userId.." });
       } else {
         query.userId = userId;
       }
     }
-    if (category != null) query.category = category.trim();
+    if (category) query.category = category.trim();
     if (subcategory != null) query.subcategory = subcategory.trim();
     query.isDeleted = false;
-    let totalBooks = await bookModel.find({
-      isDeleted: false,
-    });
+    let totalBooks = await bookModel
+      .find({
+        isDeleted: false,
+      })
+      .select({ _id: 1, title: 1, excerpt: 1, userId: 1 })
+      .sort({ title: 1 });
 
     if (totalBooks.length === 0) {
       res.status(404).send({ status: false, msg: "No Book found" });
     } else if (Object.keys(query).length === 1) {
-      return res.status(200).send({ status: true, data: totalBooks });
+      return res
+        .status(200)
+        .send({ status: true, message: "success", data: totalBooks });
     } else {
-      let finalFilter = await bookModel.find(query);
-      return res.status(200).send({ status: true, data: finalFilter });
+      let finalFilter = await bookModel
+        .find(query)
+        .select({ _id: 1, title: 1, excerpt: 1, userId: 1 });
+      return res
+        .status(200)
+        .send({ status: true, message: "success", data: finalFilter });
     }
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -174,7 +215,7 @@ const updateBook = async function (req, res) {
       }
     }
     if (req.body.ISBN) {
-      if (validator.isValid(req.body.ISBN)) {
+      if (validator.isValidISBN(req.body.ISBN)) {
         const validISBN = await bookModel.findOne({ ISBN: req.body.ISBN });
         if (validISBN) {
           return res.status(400).send({
@@ -190,6 +231,9 @@ const updateBook = async function (req, res) {
         });
       }
     }
+    if (req.body.releasedAt) {
+      book.releasedAt = req.body.releasedAt;
+    }
     // book.releasedAt = moment();
     let book2 = await bookModel.findByIdAndUpdate({ _id: id }, book, {
       new: true,
@@ -202,4 +246,42 @@ const updateBook = async function (req, res) {
   }
 };
 
-module.exports = { createBook, getBooks, updateBook, getBookById };
+const deleteBookById = async function (req, res) {
+  try {
+    let id = req.params.bookId;
+
+    if (!validator.isValidObjectId(id)) {
+      return res
+        .status(400)
+        .send({ status: false, message: `BookId is invalid.` });
+    }
+
+    let Book = await bookModel.findById(id);
+
+    if (Book.isDeleted == false) {
+      let Update = await bookModel.findOneAndUpdate(
+        { _id: id },
+        { isDeleted: true, deletedAt: Date() },
+        { new: true }
+      );
+      return res.status(200).send({
+        status: true,
+        message: "successfully deleted Book",
+      });
+    } else {
+      return res
+        .status(404)
+        .send({ status: false, message: "Book already deleted" });
+    }
+  } catch (err) {
+    return res.status(500).send({ status: false, Error: err.message });
+  }
+};
+
+module.exports = {
+  createBook,
+  getBooks,
+  getBookById,
+  updateBook,
+  deleteBookById,
+};

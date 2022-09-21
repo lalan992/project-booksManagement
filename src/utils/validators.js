@@ -33,6 +33,10 @@ const isValidMobile = function (value) {
   if (typeof value === "string" && /^[0-9]\d{9}$/gi.test(value)) return true;
   return false;
 };
+const isValidISBN = function (value) {
+  if (/^[0-9\-]{14}$/gi.test(value)) return true;
+  return false;
+};
 
 const isValidRequestBody = function (requestBody) {
   return Object.keys(requestBody).length > 0;
@@ -60,6 +64,7 @@ module.exports = {
   isStringsArray,
   isValidName,
   isValidMobile,
+  isValidISBN,
 };
 
 // console.log(isStringsArray(undefined));
