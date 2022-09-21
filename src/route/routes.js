@@ -17,16 +17,23 @@ router.post("/login", userController.userLogin);
 router.post("/books", auth.Authentication, bookController.createBook);
 router.get("/books", auth.Authentication, bookController.getBooks);
 router.get("/books/:bookId", auth.Authentication, bookController.getBookById);
-router.put("/books/:bookId", auth.Authentication, bookController.updateBook);
+router.put("/books/:bookId", auth.Authentication,auth.Authorisation, bookController.updateBook);
 router.delete(
   "/books/:bookId",
   auth.Authentication,
+  auth.Authorisation,
   bookController.deleteBookById
 );
 
 //Review api
-// router.post("/books/:bookId/review", bookController.createBook);
-// router.put("/books/:bookId/review/:reviewId", bookController.updateBook);
-// router.delete("/books/:bookId/review/:reviewId", bookController.updateBook);
+router.post("/books/:bookId/review", reviewController.createReview);
+router.put(
+  "/books/:bookId/review/:reviewId",
+  reviewController.updateReviewByID
+);
+router.delete(
+  "/books/:bookId/review/:reviewId",
+  reviewController.deleteReviewById
+);
 
 module.exports = router;

@@ -34,8 +34,8 @@ const Authorisation = async function (req, res, next) {
     let book = await bookModel.findOne({ _id: bookId });
 
     if (!book)
-      return res.status(404).send({ msg: "Requested blog not found.." });
-    if (decodedToken.userId !== blog.userId.toString()) {
+      return res.status(404).send({ msg: "Requested book not found.." });
+    if (decodedToken.userId !== book.userId.toString()) {
       return res.status(403).send({ msg: " Not authorised .." });
     } else {
       next();
