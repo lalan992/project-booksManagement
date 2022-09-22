@@ -15,7 +15,9 @@ const isValid = function (value) {
 };
 const isValidPassword = function (value) {
   if (
-    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/.test(value)
+    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,15}$/.test(
+      value
+    )
   )
     return true;
   return false;

@@ -7,7 +7,7 @@ const Authentication = async function (req, res, next) {
   try {
     let token = req.headers["x-api-key"];
     if (!token) {
-      return res.send({ msg: "Error : enter a token" });
+      return res.send({ status: false, msg: "Enter token in the headers" });
     }
     jwt.verify(token, "secretkey", function (err, decodedToken) {
       if (err) {
@@ -34,14 +34,16 @@ const Authorisation = async function (req, res, next) {
     let book = await bookModel.findOne({ _id: bookId });
 
     if (!book)
-      return res.status(404).send({ msg: "Requested book not found.." });
+      return res
+        .status(404)
+        .send({ status: false, msg: "Requested book not found.." });
     if (decodedToken.userId !== book.userId.toString()) {
       return res.status(403).send({ status: false, msg: " Not authorised .." });
     } else {
       next();
     }
   } catch (err) {
-    return res.status(500).send({ msg: err.message });
+    return res.status(500).send({ status: false, msg: err.message });
   }
 };
 

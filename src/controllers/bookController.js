@@ -128,11 +128,18 @@ const getBooks = async function (req, res) {
       .find({
         isDeleted: false,
       })
-      .select({ updatedAt: 0, createdAt: 0, isDeleted: 0 })
+      .select({
+        updatedAt: 0,
+        createdAt: 0,
+        isDeleted: 0,
+        ISBN: 0,
+        subcategory: 0,
+        __v: 0,
+      })
       .sort({ title: 1 });
 
     if (totalBooks.length === 0) {
-      res.status(404).send({ status: false, msg: "No Book found" });
+      return res.status(404).send({ status: false, msg: "No Book found" });
     } else if (Object.keys(query).length === 1) {
       return res
         .status(200)
@@ -140,11 +147,22 @@ const getBooks = async function (req, res) {
     } else {
       let finalFilter = await bookModel
         .find(query)
-        .select({ updatedAt: 0, createdAt: 0, isDeleted: 0 })
+        .select({
+          updatedAt: 0,
+          createdAt: 0,
+          isDeleted: 0,
+          ISBN: 0,
+          subcategory: 0,
+          __v: 0,
+        })
         .sort({ title: 1 });
-      return res
-        .status(200)
-        .send({ status: true, message: "success", data: finalFilter });
+      if (finalFilter.length > 0) {
+        return res
+          .status(200)
+          .send({ status: true, message: "success", data: finalFilter });
+      } else {
+        return res.status(404).send({ status: false, msg: "No Book found" });
+      }
     }
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -229,7 +247,7 @@ const updateBook = async function (req, res) {
       } else {
         return res.status(400).send({
           status: false,
-          message: "ISBN must be string.",
+          message: "Book ISBN must be string and 14 digits with '-'.",
         });
       }
     }
@@ -244,19 +262,13 @@ const updateBook = async function (req, res) {
       .status(200)
       .send({ status: true, message: "successfully updated", data: book2 });
   } catch (err) {
-    return res.status(500).send({ message: err.message });
+    return res.status(500).send({ status: false,message: err.message });
   }
 };
 
 const deleteBookById = async function (req, res) {
   try {
     let id = req.params.bookId;
-
-    if (!validator.isValidObjectId(id)) {
-      return res
-        .status(400)
-        .send({ status: false, message: `BookId is invalid.` });
-    }
 
     let Book = await bookModel.findById(id);
 
@@ -273,7 +285,7 @@ const deleteBookById = async function (req, res) {
     } else {
       return res
         .status(404)
-        .send({ status: false, message: "Book already deleted" });
+        .send({ status: false, message: "Book not found." });
     }
   } catch (err) {
     return res.status(500).send({ status: false, Error: err.message });
