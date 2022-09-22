@@ -11,14 +11,14 @@ const Authentication = async function (req, res, next) {
     }
     jwt.verify(token, "secretkey", function (err, decodedToken) {
       if (err) {
-        return res.status(401).send({ msg: "invalid token" });
+        return res.status(401).send({ status: false, message: err.message });
       } else {
         req["x-api-key"] = decodedToken;
         next();
       }
     });
   } catch (error) {
-    return res.status(500).send({ msg: error.message });
+    return res.status(500).send({ status: false, msg: error.message });
   }
 };
 
@@ -29,14 +29,14 @@ const Authorisation = async function (req, res, next) {
 
     let bookId = req.params.bookId;
     if (!validator.isValidObjectId(bookId)) {
-      return res.status(403).send({ msg: " invalid bookId.." });
+      return res.status(403).send({ status: false, msg: " invalid bookId.." });
     }
     let book = await bookModel.findOne({ _id: bookId });
 
     if (!book)
       return res.status(404).send({ msg: "Requested book not found.." });
     if (decodedToken.userId !== book.userId.toString()) {
-      return res.status(403).send({ msg: " Not authorised .." });
+      return res.status(403).send({ status: false, msg: " Not authorised .." });
     } else {
       next();
     }

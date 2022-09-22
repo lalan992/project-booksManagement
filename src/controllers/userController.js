@@ -24,7 +24,7 @@ const createUser = async function (req, res) {
     if (!validator.isValidName(name))
       return res.status(400).send({
         status: false,
-        msg: "name is requried and please provide a valid name",
+        msg: "name is requried and first letter of every word must be capital.",
       });
     data.name = name.trim();
 

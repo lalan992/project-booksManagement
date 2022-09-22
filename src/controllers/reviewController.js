@@ -19,7 +19,10 @@ const createReview = async function (req, res) {
     if (!validator.isValidName(reviewedBy)) {
       return res
         .status(400)
-        .send({ status: false, msg: "reviewedby is required" });
+        .send({
+          status: false,
+          msg: "reviewedby is required and first letter of every word must be capital.",
+        });
     }
 
     if (rating) {

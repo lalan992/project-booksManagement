@@ -27,10 +27,14 @@ const createBook = async function (req, res) {
     } = requestBody;
     if (userId) {
       if (!validator.isValidObjectId(userId)) {
-        return res.status(403).send({ message: " invalid userId.." });
+        return res
+          .status(403)
+          .send({ status: false, message: " invalid userId.." });
       }
       if (decodedToken.userId !== userId.toString())
-        return res.status(403).send({ message: " Not authorised .." });
+        return res
+          .status(403)
+          .send({ status: false, message: " Not authorised .." });
     } else {
       return res.status(400).send({
         status: false,
@@ -42,7 +46,7 @@ const createBook = async function (req, res) {
     if (!validator.isValid(title)) {
       return res.status(400).send({
         status: false,
-        message: "Book Title must be string. ",
+        message: "Book Title is required and must be strings. ",
       });
     }
     const validTitle = await bookModel.findOne({ title: req.body.title });
@@ -55,7 +59,7 @@ const createBook = async function (req, res) {
     if (!validator.isValidISBN(ISBN)) {
       return res.status(400).send({
         status: false,
-        message: "Book ISBN must be string and 13 digits without '-'.",
+        message: "Book ISBN must be string and 14 digits with '-'.",
       });
     }
     const validISBN = await bookModel.findOne({ ISBN: req.body.ISBN });
@@ -69,32 +73,29 @@ const createBook = async function (req, res) {
     if (!validator.isValid(excerpt)) {
       return res.status(400).send({
         status: false,
-        message: "Book excerpt must be string.",
+        message: "Book excerpt is required and must be strings.",
       });
     }
     if (!validator.isValid(category)) {
       return res.status(400).send({
         status: false,
-        message: "Book category must be string.",
+        message: "Book category is required and must be strings.",
       });
     }
 
-    if (subcategory) {
-      if (!validator.isStringsArray(subcategory)) {
-        return res.status(400).send({
-          status: false,
-          message:
-            "Book subcategory is an array of strings and don't provide empty string in array.",
-        });
-      }
-    } else {
+    if (!validator.isValid(subcategory)) {
       return res.status(400).send({
         status: false,
-        message: "Book subcategory is required.",
+        message: "Book subcategory  is required and must be strings.",
       });
     }
+
     if (!releasedAt) {
-      requestBody.releasedAt = moment().format("YYYY-MM-DD");
+      return res.status(400).send({
+        status: false,
+        message:
+          "Book releasedAt  is required and must be strings in this format 'YYYY-MM-DD'.",
+      });
     }
     //After validation Book created
     let created = await bookModel.create(requestBody);
@@ -121,13 +122,13 @@ const getBooks = async function (req, res) {
       }
     }
     if (category) query.category = category.trim();
-    if (subcategory != null) query.subcategory = subcategory.trim();
+    if (subcategory) query.subcategory = subcategory.trim();
     query.isDeleted = false;
     let totalBooks = await bookModel
       .find({
         isDeleted: false,
       })
-      .select({ _id: 1, title: 1, excerpt: 1, userId: 1 })
+      .select({ updatedAt: 0, createdAt: 0, isDeleted: 0 })
       .sort({ title: 1 });
 
     if (totalBooks.length === 0) {
@@ -139,7 +140,8 @@ const getBooks = async function (req, res) {
     } else {
       let finalFilter = await bookModel
         .find(query)
-        .select({ _id: 1, title: 1, excerpt: 1, userId: 1 });
+        .select({ updatedAt: 0, createdAt: 0, isDeleted: 0 })
+        .sort({ title: 1 });
       return res
         .status(200)
         .send({ status: true, message: "success", data: finalFilter });
@@ -158,7 +160,7 @@ const getBookById = async function (req, res) {
         message: "book not found..",
       });
     }
-    let reviews = await reviewModel.find({ bookId: id });
+    let reviews = await reviewModel.find({ bookId: id, isDeleted: false });
     let result = book._doc;
     result.reviewsData = reviews;
     return res
