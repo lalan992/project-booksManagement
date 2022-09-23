@@ -49,11 +49,14 @@ const createReview = async function (req, res) {
         .send({ status: false, msg: " book is not found." });
     }
     data.bookId = bookId;
-    let savedData = await reviewModel.create(data);
+    let reviewData = await reviewModel.create(data);
     const updatedBook = await bookModel.findByIdAndUpdate(
       { _id: book1._id },
       { $inc: { reviews: +1 } }
     );
+    let savedData = await reviewModel
+      .findOne({ reviewedBy: data.reviewedBy })
+      .populate("bookId");
 
     return res
       .status(201)
