@@ -15,12 +15,15 @@ const createReview = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "Provide review Details" });
     }
-
-    if (!validator.isValidName(reviewedBy)) {
-      return res.status(400).send({
-        status: false,
-        msg: "reviewedby is required and first letter of every word must be capital.",
-      });
+    if (reviewedBy) {
+      if (!validator.isValidName(reviewedBy)) {
+        return res.status(400).send({
+          status: false,
+          msg: "reviewedby is required and first letter of every word must be capital.",
+        });
+      }
+    } else {
+      data.reviewedBy = "Guest";
     }
 
     if (rating) {
@@ -76,7 +79,10 @@ const updateReviewByID = async function (req, res) {
       return res.status(404).send({ status: false, msg: " Invalid reviewId." });
     }
 
-    let validReview = await reviewModel.findOne({ _id: reviewId, bookId: bookId });
+    let validReview = await reviewModel.findOne({
+      _id: reviewId,
+      bookId: bookId,
+    });
     if (!validReview || validReview.isDeleted == true) {
       let msgUser = " Review not found.";
       return res.status(404).send({ status: false, message: msgUser });
