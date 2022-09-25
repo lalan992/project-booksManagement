@@ -7,7 +7,7 @@ const Authentication = async function (req, res, next) {
   try {
     let token = req.headers["x-api-key"];
     if (!token) {
-      return res.send({ status: false, msg: "Enter token in the headers" });
+      return res.send({ status: false, message: "Enter token in the headers" });
     }
     jwt.verify(token, "secretkey", function (err, decodedToken) {
       if (err) {
@@ -18,7 +18,7 @@ const Authentication = async function (req, res, next) {
       }
     });
   } catch (error) {
-    return res.status(500).send({ status: false, msg: error.message });
+    return res.status(500).send({ status: false, message: error.message });
   }
 };
 
@@ -29,21 +29,25 @@ const Authorisation = async function (req, res, next) {
 
     let bookId = req.params.bookId;
     if (!validator.isValidObjectId(bookId)) {
-      return res.status(403).send({ status: false, msg: " invalid bookId.." });
+      return res
+        .status(403)
+        .send({ status: false, message: " invalid bookId.." });
     }
     let book = await bookModel.findOne({ _id: bookId });
 
     if (!book)
       return res
         .status(404)
-        .send({ status: false, msg: "Requested book not found.." });
+        .send({ status: false, message: "Requested book not found.." });
     if (decodedToken.userId !== book.userId.toString()) {
-      return res.status(403).send({ status: false, msg: " Not authorised .." });
+      return res
+        .status(403)
+        .send({ status: false, message: " Not authorised .." });
     } else {
       next();
     }
   } catch (err) {
-    return res.status(500).send({ status: false, msg: err.message });
+    return res.status(500).send({ status: false, message: err.message });
   }
 };
 

@@ -59,7 +59,8 @@ const createBook = async function (req, res) {
     if (!validator.isValidISBN(ISBN)) {
       return res.status(400).send({
         status: false,
-        message: "Book ISBN must be string and 14 digits with '-'.",
+        message:
+          "Book ISBN is required , must be string and 14 digits with '-'.",
       });
     }
     const validISBN = await bookModel.findOne({ ISBN: req.body.ISBN });
@@ -90,11 +91,11 @@ const createBook = async function (req, res) {
       });
     }
 
-    if (!releasedAt) {
+    if (!validator.isValidDate(releasedAt)) {
       return res.status(400).send({
         status: false,
         message:
-          "Book releasedAt  is required and must be strings in this format 'YYYY-MM-DD'.",
+          "Book releasedAt  is required, must be valid date and as string in this format 'YYYY-MM-DD'.",
       });
     }
     //After validation Book created
@@ -116,7 +117,9 @@ const getBooks = async function (req, res) {
     let query = {};
     if (userId) {
       if (!validator.isValidObjectId(userId)) {
-        return res.status(403).send({ message: "invalid userId.." });
+        return res
+          .status(403)
+          .send({ status: false, message: "invalid userId.." });
       } else {
         query.userId = userId;
       }
@@ -139,11 +142,11 @@ const getBooks = async function (req, res) {
       .sort({ title: 1 });
 
     if (totalBooks.length === 0) {
-      return res.status(404).send({ status: false, msg: "No Book found" });
+      return res.status(404).send({ status: false, message: "No Book found" });
     } else if (Object.keys(query).length === 1) {
       return res
         .status(200)
-        .send({ status: true, message: "success", data: totalBooks });
+        .send({ status: true, message: "Books list", data: totalBooks });
     } else {
       let finalFilter = await bookModel
         .find(query)
@@ -159,9 +162,11 @@ const getBooks = async function (req, res) {
       if (finalFilter.length > 0) {
         return res
           .status(200)
-          .send({ status: true, message: "success", data: finalFilter });
+          .send({ status: true, message: "Books list", data: finalFilter });
       } else {
-        return res.status(404).send({ status: false, msg: "No Book found" });
+        return res
+          .status(404)
+          .send({ status: false, message: "No Book found" });
       }
     }
   } catch (error) {
@@ -183,7 +188,7 @@ const getBookById = async function (req, res) {
     result.reviewsData = reviews;
     return res
       .status(200)
-      .send({ status: true, message: "success", data: result });
+      .send({ status: true, message: "Books list", data: result });
   } catch {
     return res.status(500).send({ message: err.message });
   }
@@ -262,7 +267,7 @@ const updateBook = async function (req, res) {
       .status(200)
       .send({ status: true, message: "successfully updated", data: book2 });
   } catch (err) {
-    return res.status(500).send({ status: false,message: err.message });
+    return res.status(500).send({ status: false, message: err.message });
   }
 };
 

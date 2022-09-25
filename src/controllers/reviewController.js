@@ -13,13 +13,14 @@ const createReview = async function (req, res) {
     if (!validator.isValidRequestBody(data)) {
       return res
         .status(400)
-        .send({ status: false, msg: "Provide review Details" });
+        .send({ status: false, message: "Provide review Details" });
     }
     if (reviewedBy) {
       if (!validator.isValidName(reviewedBy)) {
         return res.status(400).send({
           status: false,
-          msg: "reviewedby is required and first letter of every word must be capital.",
+          message:
+            "reviewedby is required and first letter of every word must be capital.",
         });
       }
     } else {
@@ -30,23 +31,25 @@ const createReview = async function (req, res) {
       if (!(rating >= 1 && rating <= 5)) {
         return res
           .status(400)
-          .send({ status: false, msg: " Provide rating between 1 to 5." });
+          .send({ status: false, message: " Provide rating between 1 to 5." });
       }
     } else {
-      return res.status(400).send({ status: false, msg: "Rating is required" });
+      return res
+        .status(400)
+        .send({ status: false, message: "Rating is required" });
     }
 
     data.reviewedAt = moment().format("YYYY-MM-DD");
 
     if (!validator.isValidObjectId(bookId)) {
-      return res.status(400).send({ status: false, msg: "Invalid bookId" });
+      return res.status(400).send({ status: false, message: "Invalid bookId" });
     }
 
     let book1 = await bookModel.findById(bookId);
     if (!book1 || book1.isDeleted == true) {
       return res
         .status(404)
-        .send({ status: false, msg: " book is not found." });
+        .send({ status: false, message: " book is not found." });
     }
     data.bookId = bookId;
     let reviewData = await reviewModel.create(data);
@@ -55,14 +58,14 @@ const createReview = async function (req, res) {
       { $inc: { reviews: +1 } }
     );
     let savedData = await reviewModel
-      .findOne({ reviewedBy: data.reviewedBy, bookId: bookId })
+      .findOne({ _id: reviewData._id, bookId: bookId })
       .populate("bookId");
 
     return res
       .status(201)
       .send({ status: true, message: "review posted", data: savedData });
   } catch (error) {
-    return res.status(500).send({ status: false, msg: error.message });
+    return res.status(500).send({ status: false, message: error.message });
   }
 };
 
@@ -70,16 +73,20 @@ const updateReviewByID = async function (req, res) {
   try {
     let bookId = req.params.bookId;
     if (!validator.isValidObjectId(bookId)) {
-      return res.status(404).send({ status: false, msg: " Invalid bookid." });
+      return res
+        .status(404)
+        .send({ status: false, message: " Invalid bookid." });
     }
     let validBook = await bookModel.findById(bookId);
     if (!validBook || validBook.isDeleted == true) {
-      let msgUser = "Book not found.  ";
-      return res.status(404).send({ status: false, message: msgUser });
+      let messageUser = "Book not found.  ";
+      return res.status(404).send({ status: false, message: messageUser });
     }
     let reviewId = req.params.reviewId;
     if (!validator.isValidObjectId(reviewId)) {
-      return res.status(404).send({ status: false, msg: " Invalid reviewId." });
+      return res
+        .status(404)
+        .send({ status: false, message: " Invalid reviewId." });
     }
 
     let validReview = await reviewModel.findOne({
@@ -87,41 +94,42 @@ const updateReviewByID = async function (req, res) {
       bookId: bookId,
     });
     if (!validReview || validReview.isDeleted == true) {
-      let msgUser = " Review not found.";
-      return res.status(404).send({ status: false, message: msgUser });
+      let messageUser = "Review not found.";
+      return res.status(404).send({ status: false, message: messageUser });
     }
 
-    const { review, rating, reviewedBy } = req.body;
     if (!validator.isValidRequestBody(req.body)) {
       return res
         .status(400)
-        .send({ status: false, msg: "Provide Details for updation." });
+        .send({ status: false, message: "Provide Details for updation." });
     }
+    const { review, rating, reviewedBy } = req.body;
+    let data = {};
     if (rating) {
       if (!(rating >= 1 && rating <= 5)) {
         return res
           .status(400)
-          .send({ status: false, msg: " Provide rating between 1 to 5" });
+          .send({ status: false, message: "Provide rating between 1 to 5" });
       }
+      data.rating = rating;
     }
     if (reviewedBy) {
       if (!validator.isValidName(reviewedBy)) {
-        return res
-          .status(400)
-          .send({ status: false, msg: " provide proper namne for reviewedby" });
+        return res.status(400).send({
+          status: false,
+          message: "provide proper namne for reviewedby",
+        });
       }
+      data.reviewedBy = reviewedBy;
     }
     if (review) {
       if (!validator.isValid(review)) {
         return res
           .status(400)
-          .send({ status: false, msg: "Review must be string." });
+          .send({ status: false, message: "Review must be string." });
       }
+      data.review = review;
     }
-    let data = {};
-    data.rating = rating;
-    data.reviewedBy = reviewedBy;
-    data.review = review;
 
     let updatedReview = await reviewModel.findOneAndUpdate(
       { _id: reviewId },
@@ -134,7 +142,7 @@ const updateReviewByID = async function (req, res) {
       data: updatedReview,
     });
   } catch (error) {
-    return res.status(400).send({ status: false, msg: error.message });
+    return res.status(400).send({ status: false, message: error.message });
   }
 };
 
@@ -184,7 +192,7 @@ const deleteReviewById = async function (req, res) {
       .status(200)
       .send({ status: true, message: "review is deleted..." });
   } catch (error) {
-    return res.status(500).send({ status: false, Error: error.message });
+    return res.status(500).send({ status: false, message: error.message });
   }
 };
 module.exports = { createReview, updateReviewByID, deleteReviewById };

@@ -26,6 +26,10 @@ const isValidEmail = function (value) {
   if (/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/.test(value)) return true;
   return false;
 };
+const isValidDate = function (value) {
+  if (/^\d{4}-[0-1][0-9]-[0-3][0-9]$/.test(value)) return true;
+  return false;
+};
 
 const isValidTitle = function (title) {
   return ["Mr", "Mrs", "Miss"].includes(title);
@@ -67,6 +71,7 @@ module.exports = {
   isValidName,
   isValidMobile,
   isValidISBN,
+  isValidDate,
 };
 
-// console.log(isStringsArray(undefined));
+// console.log(isValidDate("1555-12-32"));

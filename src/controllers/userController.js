@@ -10,21 +10,24 @@ const createUser = async function (req, res) {
     if (!validator.isValidRequestBody(data))
       return res
         .status(404)
-        .send({ status: false, msg: "provide user details is required" });
+        .send({ status: false, message: "provide user details is required" });
 
     if (!title)
-      return res.status(400).send({ status: false, msg: "title is requried" });
+      return res
+        .status(400)
+        .send({ status: false, message: "title is requried" });
     if (!validator.isValidTitle(title))
       return res.status(400).send({
         status: false,
-        msg: "Title must be string and among these Mr, Mrs and Miss",
+        message: "Title must be string and among these Mr, Mrs and Miss",
       });
     data.title = title.trim();
 
     if (!validator.isValidName(name))
       return res.status(400).send({
         status: false,
-        msg: "Name is requried and first letter of every word must be capital.",
+        message:
+          "Name is requried and first letter of every word must be capital.",
       });
     data.name = name.trim();
 
@@ -58,12 +61,13 @@ const createUser = async function (req, res) {
     if (!validator.isValidPassword(password))
       return res.status(400).send({
         status: false,
-        msg: "Password is required, Please enter At least one upper case,  one lower case English letter, one digit,  one special character and minimum eight in length",
+        message:
+          "Password is required, Please enter At least one upper case,  one lower case English letter, one digit,  one special character and minimum eight in length",
       });
     data.password = password.trim();
 
-    const { street, city, pincode } = data.address;
     if (address) {
+      const { street, city, pincode } = data.address;
       if (!validator.isValid(street)) {
         return res
           .status(400)
@@ -119,7 +123,9 @@ const userLogin = async function (req, res) {
     }
     let validuserId = await userModel.findOne(requestBody).select({ _id: 1 });
     if (!validuserId) {
-      return res.status(404).send({ msg: "invalid email or password" });
+      return res
+        .status(404)
+        .send({ status: false, message: "Credential don't match." });
     }
     //creating Jwt
     let token = jwt.sign(
