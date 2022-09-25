@@ -83,11 +83,10 @@ const createUser = async function (req, res) {
           .status(400)
           .send({ status: false, message: "Please provide valid pincode" });
       }
+      data.address.street = address["street"].trim();
+      data.address.city = address["city"].trim();
+      data.address.pincode = address["pincode"].toString().trim();
     }
-
-    data.address.street = address["street"].trim();
-    data.address.city = address["city"].trim();
-    data.address.pincode = address["pincode"].toString().trim();
 
     const userCreated = await userModel.create(data);
     return res.status(201).send({ status: true, data: userCreated });
