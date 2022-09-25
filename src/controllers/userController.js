@@ -24,14 +24,14 @@ const createUser = async function (req, res) {
     if (!validator.isValidName(name))
       return res.status(400).send({
         status: false,
-        msg: "name is requried and first letter of every word must be capital.",
+        msg: "Name is requried and first letter of every word must be capital.",
       });
     data.name = name.trim();
 
     if (!validator.isValidMobile(phone))
       return res.status(400).send({
         status: false,
-        message: "phone is requried,Please provide valid number",
+        message: "Phone is requried,Please provide valid number",
       });
     data.phone = phone.trim();
 
@@ -45,14 +45,14 @@ const createUser = async function (req, res) {
     if (!validator.isValidEmail(email))
       return res.status(400).send({
         status: false,
-        message: "email is requried,Please provide valid number",
+        message: "Email is requried,Please provide valid email.",
       });
     data.email = email.toString().trim();
     const validemail = await userModel.findOne({ email: data.email });
     if (validemail) {
       return res
         .status(400)
-        .send({ status: false, message: "email is already in registered.." });
+        .send({ status: false, message: "Email is already in registered.." });
     }
 
     if (!validator.isValidPassword(password))

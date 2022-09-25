@@ -30,7 +30,7 @@ const createReview = async function (req, res) {
       if (!(rating >= 1 && rating <= 5)) {
         return res
           .status(400)
-          .send({ status: false, msg: " Provide rating between 1 to 5" });
+          .send({ status: false, msg: " Provide rating between 1 to 5." });
       }
     } else {
       return res.status(400).send({ status: false, msg: "Rating is required" });
@@ -55,7 +55,7 @@ const createReview = async function (req, res) {
       { $inc: { reviews: +1 } }
     );
     let savedData = await reviewModel
-      .findOne({ reviewedBy: data.reviewedBy })
+      .findOne({ reviewedBy: data.reviewedBy, bookId: bookId })
       .populate("bookId");
 
     return res
