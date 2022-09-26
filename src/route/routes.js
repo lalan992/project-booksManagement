@@ -37,8 +37,8 @@ router.delete(
   reviewController.deleteReviewById
 );
 
-router.get("/*", function (req, res) {
-  res.status(400).send("invalid request!!");
+router.all("/***", function (req, res) {
+  res.status(400).send({status:false,message:"invalid request!!"});
 });
 
 module.exports = router;

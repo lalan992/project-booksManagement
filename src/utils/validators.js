@@ -41,7 +41,7 @@ const isValidMobile = function (value) {
   return false;
 };
 const isValidISBN = function (value) {
-  if (/^[0-9\-]{14}$/gi.test(value)) return true;
+  if (/^[\d]{3}-[\d]{10}$/gi.test(value)) return true;
   return false;
 };
 
