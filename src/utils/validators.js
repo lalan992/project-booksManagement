@@ -27,7 +27,8 @@ const isValidEmail = function (value) {
   return false;
 };
 const isValidDate = function (value) {
-  if (/^\d{4}-[0-1][0-9]-[0-3][0-9]$/.test(value)) return true;
+  if (/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/.test(value))
+    return true;
   return false;
 };
 

@@ -176,6 +176,11 @@ const getBooks = async function (req, res) {
 const getBookById = async function (req, res) {
   try {
     let id = req.params.bookId;
+    if (!validator.isValidObjectId(id)) {
+      return res
+        .status(403)
+        .send({ status: false, message: " invalid bookId.." });
+    }
     let book = await bookModel.findById(id);
     if (!book || book.isDeleted === true) {
       return res.status(404).send({
