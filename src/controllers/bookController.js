@@ -60,7 +60,7 @@ const createBook = async function (req, res) {
       return res.status(400).send({
         status: false,
         message:
-          "Book ISBN is required , must be string and 14 digits with '-'.",
+          "Book ISBN is required , must be string and 13 digits and '-'.",
       });
     }
     const validISBN = await bookModel.findOne({ ISBN: req.body.ISBN });
@@ -257,7 +257,7 @@ const updateBook = async function (req, res) {
       } else {
         return res.status(400).send({
           status: false,
-          message: "Book ISBN must be string and 14 digits with '-'.",
+          message: "Book ISBN must be string and 13 digits AND '-'.",
         });
       }
     }

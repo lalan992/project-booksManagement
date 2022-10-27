@@ -16,6 +16,7 @@ const createUser = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "title is requried" });
+
     if (!validator.isValidTitle(title))
       return res.status(400).send({
         status: false,
@@ -112,7 +113,6 @@ const userLogin = async function (req, res) {
         status: false,
         message: `Email is mandatory and provide valid email address`,
       });
-      return;
     }
     if (!validator.isValidPassword(password)) {
       return res.status(400).send({
